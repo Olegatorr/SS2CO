@@ -263,14 +263,49 @@ namespace SS2OC3
             using (Pen redPen = new Pen(Color.Red, 10f), whitePen = new Pen(Color.White, 10f)) {
                 using (Graphics formGraphics = this.CreateGraphics()) {
 
-                    while (true) {
+                    while (true)
+                    {
+                        Bitmap frame = TakeScreenShot();
+                        
+                        for (int height = 0; height > frame.Width; height++)
+                        {
+                            for (int width = 0; width > frame.Width; width++)
+                            {
+                                if (PixelCompare(frame.GetPixel(width, height)))
+                                {
+                                    
+                                }
+                            }
+                        }
 
-                        
-                        
                     }
                 }
             }
         }
+
+        private static bool PixelCompare(Color pixel)
+        {
+            if (pixel.R > ) 
+            {
+                
+            }
+
+            return true;
+        }
+        
+        private static Bitmap TakeScreenShot()
+        {
+            Bitmap bmp = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                g.CopyFromScreen(0, 0, 0, 0, Screen.PrimaryScreen.Bounds.Size);
+
+                return bmp;
+
+                //bmp.Save("screenshot.png");  // saves the image
+            }                 
+        }
+        
     }
 }
 
