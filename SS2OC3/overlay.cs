@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -40,7 +41,17 @@ namespace SS2OC3
         const int myLparam = 0x5073d; //used for maximizing the screen.
 
 
+        
+        
+        
         int oldWindowLong;
+        private Bitmap frame = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
+        static Color reference = Color.FromArgb(255, 10, 230, 30);
+        private static int threshold = 50;
+        
+        
+        
+        
 
         [Flags]
         enum WindowStyles : uint
@@ -265,55 +276,80 @@ namespace SS2OC3
                 using (Graphics formGraphics = this.CreateGraphics())
                 {
                     int counter = 0;
+                    
                     while (true)
                     {
-                        Bitmap frame = TakeScreenShot();
                         
-                        for (int height = 0; height > frame.Width; height++)
+                        if(IsAc)
+                        
+                        //frame = WindowScreenshotWithoutClass();
+
+                        Graphics graph = null;
+                        graph = Graphics.FromImage(frame);
+                        graph.CopyFromScreen(0, 0, 0, 0, frame.Size);
+
+                        for (int height = 0; height < frame.Height; height++) // HERE
                         {
-                            for (int width = 0; width > frame.Width; width++)
+                            for (int width = 0; width < frame.Width; width++)
                             {
-                                if (PixelCompare(frame.GetPixel(width, height)))
+                                
+                                if (ColorsAreClose( frame.GetPixel(width, height)))
                                 {
-                                    
-                                    Color tempPixel = frame.GetPixel(width, height);
-                                    formGraphics.Clear(Color.Red);
-                                    
+
                                     tankX = width;
                                     tankY = height;
-                                    
-                                    Console.Out.NewLine = ("R = " + tempPixel.R + ", comp " + (tempPixel.R >  120));
-                                    Console.Out.NewLine = ("R = " + tempPixel.R + ", comp " + (tempPixel.R <  160));
-                                    Console.Out.NewLine = ("G = " + tempPixel.G + ", comp " + (tempPixel.G == 255));
-                                    Console.Out.NewLine = ("B = " + tempPixel.B + ", comp " + (tempPixel.B >  150));
-                                    
+
                                     formGraphics.DrawEllipse(redPen, tankX, tankY, 1, 1);
                                     formGraphics.DrawRectangle(redPen, tankX, tankY, 100, 100);
                                     
+                                    goto found;
                                 }
                             }
                         }
 
+                        found:
+                        
                         counter++;
                         Console.Out.NewLine = ("Working on frame " + counter + ", online");
                         
                         formGraphics.DrawRectangle(redPen, 0, 0, Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
                         
-                        Thread.Sleep(10);
+                        Thread.Sleep(100);
                         
-                        formGraphics.Clear(Color.Red);
+                        formGraphics.Clear(TransparencyKey);
                         
                     }
                 }
             }
         }
 
-        private static bool PixelCompare(Color pixel)
+        public bool ColorsAreClose(Color color)
         {
-            return pixel.R >  120 &&
-                   pixel.R <  160 &&
-                   pixel.G == 255 &&
-                   pixel.B >  150;
+
+            var rDist = Math.Abs(color.R - reference.R);
+            var gDist = Math.Abs(color.G - reference.G);
+            var bDist = Math.Abs(color.B - reference.B);
+
+            if(rDist + gDist + bDist > threshold)
+                return false;
+
+            return true;
+
+        }
+
+        private Bitmap WindowScreenshotWithoutClass()
+        {
+            Rectangle bounds = Screen.PrimaryScreen.Bounds;
+
+            using (Bitmap bitmap = new Bitmap(bounds.Width, bounds.Height))
+            {
+                using (Graphics g = Graphics.FromImage(bitmap))
+                {
+                    g.CopyFromScreen(new Point(bounds.Left, bounds.Top), Point.Empty, bounds.Size);
+                    
+                }
+                return bitmap;
+            }
         }
         
         private static Bitmap TakeScreenShot()
@@ -322,11 +358,10 @@ namespace SS2OC3
             using (Graphics g = Graphics.FromImage(bmp))
             {
                 g.CopyFromScreen(0, 0, 0, 0, Screen.PrimaryScreen.Bounds.Size);
-
                 return bmp;
-
-                //bmp.Save("screenshot.png");  // saves the image
-            }                 
+                
+            }    
+            
         }
         
     }
