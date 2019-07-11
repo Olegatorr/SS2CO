@@ -24,12 +24,14 @@ namespace SS2OC3
 
         public void buttonStart_Click(object sender, EventArgs e)
         {
+            pictureBox1.Image = SS2OC3.Properties.Resources.green2;
             overlayForm.MaximumSize = new System.Drawing.Size(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
             overlayForm.Show();
         }
 
         private void buttonStop_Click(object sender, EventArgs e)
         {
+            pictureBox1.Image = SS2OC3.Properties.Resources.red2;
             overlayForm.Hide();
         }
         

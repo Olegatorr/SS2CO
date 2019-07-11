@@ -9,6 +9,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Threading;
 using System.Runtime.InteropServices;
+using Overlay.NET.Common;
 
 namespace SS2OC3
 {
@@ -254,15 +255,16 @@ namespace SS2OC3
         {
             BackgroundWorker worker = sender as BackgroundWorker;
 
-            int numRedLines = 500;
-            int numWhiteLines = 1000;
+            int tankX = 0; // width
+            int tankY = 0; // height
 
             Size fullSize = getFullScreensSize();
             Point topLeft = getTopLeft();
 
             using (Pen redPen = new Pen(Color.Red, 10f), whitePen = new Pen(Color.White, 10f)) {
-                using (Graphics formGraphics = this.CreateGraphics()) {
-
+                using (Graphics formGraphics = this.CreateGraphics())
+                {
+                    int counter = 0;
                     while (true)
                     {
                         Bitmap frame = TakeScreenShot();
@@ -274,10 +276,33 @@ namespace SS2OC3
                                 if (PixelCompare(frame.GetPixel(width, height)))
                                 {
                                     
+                                    Color tempPixel = frame.GetPixel(width, height);
+                                    formGraphics.Clear(Color.Red);
+                                    
+                                    tankX = width;
+                                    tankY = height;
+                                    
+                                    Console.Out.NewLine = ("R = " + tempPixel.R + ", comp " + (tempPixel.R >  120));
+                                    Console.Out.NewLine = ("R = " + tempPixel.R + ", comp " + (tempPixel.R <  160));
+                                    Console.Out.NewLine = ("G = " + tempPixel.G + ", comp " + (tempPixel.G == 255));
+                                    Console.Out.NewLine = ("B = " + tempPixel.B + ", comp " + (tempPixel.B >  150));
+                                    
+                                    formGraphics.DrawEllipse(redPen, tankX, tankY, 1, 1);
+                                    formGraphics.DrawRectangle(redPen, tankX, tankY, 100, 100);
+                                    
                                 }
                             }
                         }
 
+                        counter++;
+                        Console.Out.NewLine = ("Working on frame " + counter + ", online");
+                        
+                        formGraphics.DrawRectangle(redPen, 0, 0, Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
+                        
+                        Thread.Sleep(10);
+                        
+                        formGraphics.Clear(Color.Red);
+                        
                     }
                 }
             }
@@ -285,12 +310,10 @@ namespace SS2OC3
 
         private static bool PixelCompare(Color pixel)
         {
-            if (pixel.R > ) 
-            {
-                
-            }
-
-            return true;
+            return pixel.R >  120 &&
+                   pixel.R <  160 &&
+                   pixel.G == 255 &&
+                   pixel.B >  150;
         }
         
         private static Bitmap TakeScreenShot()
