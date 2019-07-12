@@ -13,26 +13,18 @@ namespace SS2OC3
 {
     public partial class Form1 : Form
     {
-        public bool active = false;
         overlay overlayForm = new overlay();
-        
-        public delegate void MethodContainer();
-        public event MethodContainer onCount;
-
         public Form1()
         {
             InitializeComponent();
             
         }
 
-        public bool IsActive()
-        {
-            return active;
-        }
+
         
         public void buttonStart_Click(object sender, EventArgs e)
         {
-            active = true;
+            overlayForm.SetActive(true);
             pictureBox1.Image = SS2OC3.Properties.Resources.green2;
             overlayForm.MaximumSize = new System.Drawing.Size(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
             overlayForm.Show();
@@ -40,7 +32,7 @@ namespace SS2OC3
 
         private void buttonStop_Click(object sender, EventArgs e)
         {
-            active = false;
+            overlayForm.SetActive(false);
             pictureBox1.Image = SS2OC3.Properties.Resources.red2;
             overlayForm.Hide();
         }

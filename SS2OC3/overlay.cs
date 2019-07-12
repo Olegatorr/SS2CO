@@ -48,7 +48,7 @@ namespace SS2OC3
         private Bitmap frame = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
         static Color reference = Color.FromArgb(255, 10, 230, 30);
         private static int threshold = 50;
-        
+        private bool active = false;
         
         
         
@@ -272,60 +272,62 @@ namespace SS2OC3
             Size fullSize = getFullScreensSize();
             Point topLeft = getTopLeft();
 
-            using (Pen redPen = new Pen(Color.Red, 10f), whitePen = new Pen(Color.White, 10f)) {
+            using (Pen redPen = new Pen(Color.Red, 3f), whitePen = new Pen(Color.White, 3f)) {
                 using (Graphics formGraphics = this.CreateGraphics())
                 {
                     int counter = 0;
                     
                     while (true)
                     {
-
-                        if ()
+                        if (active)
                         {
-                            
-                        }
+                            Graphics graph = null;
+                            graph = Graphics.FromImage(frame);
+                            graph.CopyFromScreen(0, 0, 0, 0, frame.Size);
 
-                        //frame = WindowScreenshotWithoutClass();
-
-                        Graphics graph = null;
-                        graph = Graphics.FromImage(frame);
-                        graph.CopyFromScreen(0, 0, 0, 0, frame.Size);
-
-                        for (int height = 0; height < frame.Height; height++) // HERE
-                        {
-                            for (int width = 0; width < frame.Width; width++)
+                            for (int height = 0; height < frame.Height; height++) // HERE
                             {
-                                
-                                if (ColorsAreClose( frame.GetPixel(width, height)))
+                                for (int width = 0; width < frame.Width; width++)
                                 {
+                                
+                                    if (ColorsAreClose( frame.GetPixel(width, height)))
+                                    {
 
-                                    tankX = width;
-                                    tankY = height;
+                                        tankX = width;
+                                        tankY = height;
 
-                                    formGraphics.DrawEllipse(redPen, tankX, tankY, 1, 1);
-                                    formGraphics.DrawRectangle(redPen, tankX, tankY, 100, 100);
+                                        formGraphics.DrawEllipse(redPen, tankX, tankY, 1, 1);
+                                        formGraphics.DrawEllipse(redPen, tankX - 50, tankY - 50, 100, 100);
                                     
-                                    goto found;
+                                        goto found;
+                                    }
                                 }
                             }
-                        }
 
-                        found:
+                            found:
                         
-                        counter++;
-                        Console.Out.NewLine = ("Working on frame " + counter + ", online");
+                            counter++;
+
+                            DrawStatus();
+                            
+                            formGraphics.DrawRectangle(redPen, 0, 0, Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
                         
-                        formGraphics.DrawRectangle(redPen, 0, 0, Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
+                            Thread.Sleep(100);
                         
-                        Thread.Sleep(100);
-                        
-                        formGraphics.Clear(TransparencyKey);
-                        
+                            formGraphics.Clear(TransparencyKey);
+                        }
+                        else
+                            Thread.Sleep(10);
                     }
                 }
             }
         }
 
+        private void DrawStatus()
+        {
+            
+        }
+        
         public bool ColorsAreClose(Color color)
         {
 
@@ -340,6 +342,17 @@ namespace SS2OC3
 
         }
 
+        public bool IsActive()
+        {
+            return active;
+        }
+
+        public void SetActive(bool state)
+        {
+            active = state;
+            return;
+        }
+        
         private Bitmap WindowScreenshotWithoutClass()
         {
             Rectangle bounds = Screen.PrimaryScreen.Bounds;
