@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,7 @@ using System.Windows.Forms;
 using System.Threading;
 using System.Runtime.InteropServices;
 using Overlay.NET.Common;
+using Tesseract;
 
 namespace SS2OC3
 {
@@ -46,9 +48,14 @@ namespace SS2OC3
         
         int oldWindowLong;
         private Bitmap frame = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
+        private Bitmap crop = new Bitmap(100, 50);
         static Color reference = Color.FromArgb(255, 10, 230, 30);
         private static int threshold = 50;
         private bool active = false;
+        int counter = 0;
+        private bool found = false;
+        private Point tankPoint;
+        
         
         
         
@@ -272,20 +279,29 @@ namespace SS2OC3
             Size fullSize = getFullScreensSize();
             Point topLeft = getTopLeft();
 
-            using (Pen redPen = new Pen(Color.Red, 3f), whitePen = new Pen(Color.White, 3f)) {
+            using (Pen redPen = new Pen(Color.Red, 3f), whitePen = new Pen(Color.White, 3f), blackPen = new Pen(Color.Black, 1f)) {
                 using (Graphics formGraphics = this.CreateGraphics())
                 {
-                    int counter = 0;
+                    
+                    Graphics graph = null;
+                    Graphics graph2 = null;
+                    graph = Graphics.FromImage(frame);
+                    graph2 = Graphics.FromImage(crop);
+                    GraphicsState graphicsState = graph.Save();
+                    GraphicsState graphicsState2 = graph2.Save();
                     
                     while (true)
                     {
                         if (active)
                         {
-                            Graphics graph = null;
-                            graph = Graphics.FromImage(frame);
-                            graph.CopyFromScreen(0, 0, 0, 0, frame.Size);
 
-                            for (int height = 0; height < frame.Height; height++) // HERE
+                            //graph = Graphics.FromImage(frame);
+                            //graph2 = Graphics.FromImage(crop); // here
+                            
+                            graph.CopyFromScreen(0, 0, 0, 0, frame.Size);
+                            found = false;
+
+                            for (int height = 0; height < frame.Height; height++)
                             {
                                 for (int width = 0; width < frame.Width; width++)
                                 {
@@ -293,28 +309,94 @@ namespace SS2OC3
                                     if (ColorsAreClose( frame.GetPixel(width, height)))
                                     {
 
+                                        formGraphics.Clear(TransparencyKey);
+                                        
                                         tankX = width;
                                         tankY = height;
+                                        tankPoint.X = tankX;
+                                        tankPoint.Y = tankY;
 
                                         formGraphics.DrawEllipse(redPen, tankX, tankY, 1, 1);
                                         formGraphics.DrawEllipse(redPen, tankX - 50, tankY - 50, 100, 100);
-                                    
-                                        goto found;
+
+                                        found = true;
+                                        break;
                                     }
                                 }
+                                if(found) break;
                             }
+                            
+                            if(!found) formGraphics.Clear(TransparencyKey);
 
-                            found:
-                        
                             counter++;
 
-                            DrawStatus();
+                            /*
+                             *
+                             * 
+                             * 
+                             */
                             
-                            formGraphics.DrawRectangle(redPen, 0, 0, Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
+                            formGraphics.FillRectangle(new SolidBrush(Color.Black),
+                                1700, 0,
+                                100, 50);
+                            
+                            formGraphics.DrawString("Frame " + counter.ToString(),
+                                new Font(FontFamily.GenericSansSerif, 7),
+                                new SolidBrush(Color.Coral),
+                                1705, 5,
+                                StringFormat.GenericDefault);
+
+                            if (found)
+                            {
+                                
+                                graph2.DrawImage(frame,
+                                    new Rectangle(0, 0, crop.Width, crop.Height), 
+                                    new Rectangle(tankX - 55, tankY + 40, 100, 50),
+                                    GraphicsUnit.Pixel);
+                                
+                                formGraphics.DrawRectangle(redPen, tankX - 55, tankY + 40, 100, 50);
+                                
+                                crop.Save("crop.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
+                                //string data = GetText(crop);
+
+                                formGraphics.DrawString("OCR ",
+                                    new Font(FontFamily.GenericSansSerif, 7),
+                                    new SolidBrush(Color.Coral),
+                                    1705, 35,
+                                    StringFormat.GenericDefault);
+
+                                formGraphics.DrawString("Tank @ x" + tankX + " y" + tankY,
+                                                                    new Font(FontFamily.GenericSansSerif, 7),
+                                                                    new SolidBrush(Color.Coral),
+                                                                    1705, 15,
+                                                                    StringFormat.GenericDefault);
+                                
+                                formGraphics.DrawString("Trying to parse data",
+                                                                new Font(FontFamily.GenericSansSerif, 7),
+                                                                new SolidBrush(Color.Coral),
+                                                                1705, 25,
+                                                                StringFormat.GenericDefault);
+
+                            }
+                            else
+                                formGraphics.DrawString("Tank not found",
+                                    new Font(FontFamily.GenericSansSerif, 7),
+                                    new SolidBrush(Color.Coral),
+                                    1705, 15,
+                                    StringFormat.GenericDefault);
+                            
+                            
+                            /*
+                             *
+                             * 
+                             *
+                             */
+                            
+                            //formGraphics.DrawRectangle(redPen, 0, 0, Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
                         
-                            Thread.Sleep(100);
+                            Thread.Sleep(500);
                         
-                            formGraphics.Clear(TransparencyKey);
+                            
                         }
                         else
                             Thread.Sleep(10);
@@ -323,11 +405,6 @@ namespace SS2OC3
             }
         }
 
-        private void DrawStatus()
-        {
-            
-        }
-        
         public bool ColorsAreClose(Color color)
         {
 
@@ -379,7 +456,30 @@ namespace SS2OC3
             }    
             
         }
+
+        public void ResetCounter()
+        {
+            counter = 0;
+        }
         
+        public static string GetText(Bitmap imgsource)
+        {
+            var ocrtext = string.Empty;
+            var engine = new TesseractEngine(@"./tessdata", "eng", EngineMode.TesseractOnly);
+            engine.SetVariable("tessedit_char_whitelist", "0123456789,.");
+            
+                //using (var img = PixConverter.ToPix(imgsource))
+                using (var img = imgsource)
+                {
+                    using (var page = engine.Process(img))
+                    {
+                        ocrtext = page.GetText();
+                    }
+                }
+            
+
+            return ocrtext;
+        }
     }
 }
 

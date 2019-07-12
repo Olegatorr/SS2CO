@@ -21,3 +21,8 @@ C:\Users\feysa\Documents\RiderProjects\SS2OC3\SS2OC3\bin\Debug\SharpDX.DXGI.xml
 C:\Users\feysa\Documents\RiderProjects\SS2OC3\SS2OC3\bin\Debug\SharpDX.Mathematics.xml
 C:\Users\feysa\Documents\RiderProjects\SS2OC3\SS2OC3\obj\Debug\SS2OC3.overlay.resources
 C:\Users\feysa\Documents\RiderProjects\SS2OC3\SS2OC3\obj\Debug\SS2OC3.csproj.CopyComplete
+C:\Users\feysa\Documents\RiderProjects\SS2OC3\SS2OC3\bin\Debug\x86\liblept1753.dll
+C:\Users\feysa\Documents\RiderProjects\SS2OC3\SS2OC3\bin\Debug\x86\libtesseract3052.dll
+C:\Users\feysa\Documents\RiderProjects\SS2OC3\SS2OC3\bin\Debug\x64\liblept1753.dll
+C:\Users\feysa\Documents\RiderProjects\SS2OC3\SS2OC3\bin\Debug\x64\libtesseract3052.dll
+C:\Users\feysa\Documents\RiderProjects\SS2OC3\SS2OC3\bin\Debug\Tesseract.dll
