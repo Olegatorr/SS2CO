@@ -8,6 +8,9 @@ namespace SS2OC3
 {
     static class Program
     {
+        
+        static private bool active = false;
+        
         /// <summary>
         /// The main entry point for the application.
         /// </summary>

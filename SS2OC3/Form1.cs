@@ -15,6 +15,9 @@ namespace SS2OC3
     {
         public bool active = false;
         overlay overlayForm = new overlay();
+        
+        public delegate void MethodContainer();
+        public event MethodContainer onCount;
 
         public Form1()
         {

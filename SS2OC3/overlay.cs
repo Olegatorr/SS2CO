@@ -279,9 +279,12 @@ namespace SS2OC3
                     
                     while (true)
                     {
-                        
-                        if(IsAc)
-                        
+
+                        if ()
+                        {
+                            
+                        }
+
                         //frame = WindowScreenshotWithoutClass();
 
                         Graphics graph = null;
